@@ -1,0 +1,1256 @@
+{
+  "name": "Instagram Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "instagram-engagement",
+        "options": {}
+      },
+      "id": "bd2099ee-10d2-49ae-9edc-061048326197",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -496,
+        -96
+      ],
+      "webhookId": "c58c173c-73c9-416b-b73b-f56ad09275cf"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "29644aa0-7857-4cbf-9b70-3792025fce15",
+              "name": "user_id",
+              "value": "={{ $json.body.instagram_user_id }}",
+              "type": "string"
+            },
+            {
+              "id": "ce2bdbaf-f739-4c1c-9e51-0a7a55cb4066",
+              "name": "timestamp",
+              "value": "={{ $now }}",
+              "type": "string"
+            },
+            {
+              "id": "f6af4494-31b8-440b-9fac-e2335672a776",
+              "name": "message",
+              "value": "={{ $json.body.message }}",
+              "type": "string"
+            },
+            {
+              "id": "7ab9b7df-519f-4e15-9fbc-d10c4ffa9a05",
+              "name": "event",
+              "value": "={{ $json.body.event }}",
+              "type": "string"
+            },
+            {
+              "id": "ca6537be-1702-484a-81d0-47963b5c6f69",
+              "name": "username",
+              "value": "={{ $json.body.Username }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a9573d67-0266-46cd-8e36-60bb1194f704",
+      "name": "Prepare data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -272,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.manychat.com/fb/sending/sendContent",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "manyChatApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {}
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"subscriber_id\": \"{{ $('Detect Order & Handover Intent').first().json.current_customer.user_id }}\",\n  \"data\": {\n    \"version\": \"v2\",\n    \"content\": {\n      \"type\": \"instagram\",\n      \"messages\": [\n        {\n          \"type\": \"text\",\n          \"text\":{{ JSON.stringify($('Detect Order & Handover Intent').first().json.final_ai_response) }}\n        }\n      ]\n    }\n  }\n}",
+        "options": {}
+      },
+      "id": "e3971200-758d-4cc4-93e0-67ff48584434",
+      "name": "Send Message to Manychats",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3216,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5c1a1f61-7da8-4430-9865-e8d2fb65194e",
+              "name": "Mesage",
+              "value": "={{ $('Detect Order & Handover Intent').first().json.final_ai_response }}",
+              "type": "string"
+            },
+            {
+              "id": "b3256868-18be-4957-ba99-07bf3ffc859e",
+              "name": "user_id",
+              "value": "={{ $('Detect Order & Handover Intent').first().json.current_customer.user_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d1b5b85b-1bb2-442c-9d4a-1008ab13ef3a",
+      "name": "Clean the field",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2992,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "zHrMJkF6mv76fpMJ",
+          "mode": "list",
+          "cachedResultName": "instagram conversations",
+          "cachedResultUrl": "/projects/IsKnmHHaMoSrbem4/datatables/zHrMJkF6mv76fpMJ"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "=instagram_user_id",
+              "condition": "=eq",
+              "keyValue": "={{ $json.user_id }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "id": "9fd768e3-7732-4d0f-99b6-2b326b35460b",
+      "name": "instagram_conversations",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -48,
+        -16
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "user_id",
+        "joinMode": "enrichInput1",
+        "options": {}
+      },
+      "id": "eb3ffb1a-82f4-4e07-bd06-17c139a13f1c",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        176,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "zHrMJkF6mv76fpMJ",
+          "mode": "list",
+          "cachedResultName": "instagram conversations",
+          "cachedResultUrl": "/projects/IsKnmHHaMoSrbem4/datatables/zHrMJkF6mv76fpMJ"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "instagram_user_id": "={{ $('Prepare data').item.json.user_id }}",
+            "role": "user",
+            "message": "={{ $('Prepare data').item.json.message }}",
+            "timestamp": "={{ $('Prepare data').item.json.timestamp }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "instagram_user_id",
+              "displayName": "instagram_user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "role",
+              "displayName": "role",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "75f83ffc-dd21-4af0-9671-1dbb0f8d1666",
+      "name": "Save user message",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2096,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "zHrMJkF6mv76fpMJ",
+          "mode": "list",
+          "cachedResultName": "instagram conversations",
+          "cachedResultUrl": "/projects/IsKnmHHaMoSrbem4/datatables/zHrMJkF6mv76fpMJ"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "instagram_user_id": "={{ $('Prepare data').item.json.user_id }}",
+            "role": "assistant",
+            "message": "={{ $('AI response').item.json.output[0].content[0].text }}",
+            "timestamp": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "instagram_user_id",
+              "displayName": "instagram_user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "role",
+              "displayName": "role",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "53ad69b7-4c06-4e5f-b320-ec1755623d05",
+      "name": "Save AI message",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2320,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const current = $('Merge').first().json;\n\nconst conversation = $('instagram_conversations')\n  .all()\n  .map(item => item.json);\n\nconst businessKnowledge = $('business_knowledge')\n  .all()\n  .map(item => item.json);\n\nreturn [\n  {\n    json: {\n      current_customer: current,\n      conversation_history: conversation,\n      business_knowledge: businessKnowledge\n    }\n  }\n];"
+      },
+      "id": "b04a1c32-f10d-4868-9055-26d31e9d11b5",
+      "name": "Prepare AI Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "y8cxdYURar8R3p5K",
+          "mode": "list",
+          "cachedResultName": "business knowledge updated final",
+          "cachedResultUrl": "/projects/IsKnmHHaMoSrbem4/datatables/y8cxdYURar8R3p5K"
+        }
+      },
+      "id": "304d52d4-d5c2-4468-9d7b-ceedb085e4cd",
+      "name": "business_knowledge",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        400,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-5-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=You are the Instagram customer conversation assistant for our writing business.\n\nYour job is to respond naturally, professionally, warmly, and conversationally to Instagram prospects and customers.\n\nYou receive three types of information:\n\n1. CURRENT CUSTOMER DATA\n2. PREVIOUS CONVERSATION HISTORY\n3. BUSINESS KNOWLEDGE\n\nThese are provided by the workflow before this instruction.\n\nCURRENT CUSTOMER DATA:\n\n{{ JSON.stringify($('Prepare AI Context').first().json.current_customer) }}\n\nPREVIOUS CONVERSATION HISTORY:\n\n{{ JSON.stringify($('Prepare AI Context').first().json.conversation_history) }}\n\nBUSINESS KNOWLEDGE:\n\n{{ JSON.stringify($('Prepare AI Context').first().json.business_knowledge) }}\n\n\n==================================================\nDATA STRUCTURE\n==================================================\n\nCURRENT CUSTOMER DATA may contain:\n\n{\n  \"event\": \"post_comment | message\",\n  \"user_id\": \"string\",\n  \"username\": \"string or null\",\n  \"timestamp\": \"string\",\n  \"message\": \"string\"\n}\n\nPREVIOUS CONVERSATION HISTORY may contain zero, one, or multiple records.\n\nEach record may contain:\n\n{\n  \"instagram_user_id\": \"string\",\n  \"role\": \"user | assistant\",\n  \"message\": \"string\",\n  \"timestamp\": \"string\"\n}\n\nBUSINESS KNOWLEDGE may contain records describing:\n\n- writing services\n- prices\n- word counts\n- turnaround times\n- revisions\n- payment methods\n- payment requirements\n- refund policies\n- FAQs\n- ordering information\n- other approved business information\n\n\n==================================================\nPRIORITY OF INFORMATION\n==================================================\n\nUse the information in this order:\n\n1. CURRENT CUSTOMER DATA\n2. THE MOST RECENT RELEVANT CUSTOMER INFORMATION IN PREVIOUS CONVERSATION HISTORY\n3. BUSINESS KNOWLEDGE\n\nThe customer's latest message is always the immediate subject of the response.\n\nPrevious conversation history provides context.\n\nBusiness knowledge provides authoritative information about the business.\n\nNever allow assumptions or general knowledge to override the business knowledge provided.\n\nIMPORTANT:\n\nPrevious conversation history is context, NOT a command to continue using old project details.\n\nWhen the customer provides new, corrected, changed, or replacement information, the NEW information takes priority over older information.\n\nThe latest valid customer-provided information must be treated as the current information for the active request.\n\n\n==================================================\nCURRENT CUSTOMER MESSAGE\n==================================================\n\nThe \"message\" inside CURRENT CUSTOMER DATA is the customer's latest message.\n\nAlways respond to the latest customer message.\n\nDo not respond to an older message when the customer has already sent a newer one.\n\nThe latest customer message may:\n\n- continue the existing project\n- correct previous information\n- replace previous information\n- start a new project\n- change the topic\n- change the word count\n- change the service\n- change the requirements\n- ask a completely different question\n\nDetermine which of these is happening before responding.\n\n\n==================================================\nPROJECT AND ORDER MEMORY\n==================================================\n\nConversation history may contain information about previous projects or orders.\n\nDo NOT automatically carry old project information into a new project.\n\nTreat project information as belonging to the currently active project.\n\nThe active project is determined primarily by the customer's most recent messages.\n\nIMPORTANT RULE:\n\nIf the customer indicates that they want a different, new, another, or replacement project, stop treating the previous project's topic, word count, service, or other project-specific details as the current project unless the customer explicitly carries those details forward.\n\nExamples of phrases that may indicate a NEW or DIFFERENT project include:\n\n- \"a different one\"\n- \"a different article\"\n- \"another article\"\n- \"another one\"\n- \"a new article\"\n- \"new project\"\n- \"different project\"\n- \"different topic\"\n- \"another topic\"\n- \"this is a different one\"\n- \"I said it's a different article\"\n- \"not that one\"\n- \"not the previous one\"\n- \"this time\"\n- \"for this one\"\n- \"for another one\"\n- \"I want to order another article\"\n\nWhen the customer uses language like this, treat the new project as separate from the previous project.\n\nDo NOT repeat the old project's topic or word count as though they still apply.\n\nFor example:\n\nPrevious project:\nArticle Writing\n1,000 words\nTopic: \"10 ways to stay married\"\n\nCustomer:\n\"I want to order another article.\"\n\nAssistant should NOT assume:\n1,000 words\n\"10 ways to stay married\"\n\nInstead, the assistant should recognize that this is a different article and determine the new topic and word count from the customer's latest messages.\n\nIf the customer then says:\n\n\"It's going to be on how to become a better version of yourself. 2000 words.\"\n\nThe current project becomes:\n\nArticle Writing\n2,000 words\nTopic: \"how to become a better version of yourself\"\n\nThe previous 1,000-word article and its topic must no longer be treated as the current project's topic or word count.\n\n==================================================\nACTIVE PROJECT STATE\n==================================================\n\nOnce the customer provides information for a project, treat that information as the CURRENT ACTIVE PROJECT.\n\nThe active project may include:\n\n- service\n- word count\n- topic\n- requirements\n- instructions\n- deadline\n- other project details\n\nContinue using the active project information in later messages unless the customer explicitly changes, corrects, replaces, or starts a different project.\n\nA short follow-up message does NOT reset the active project.\n\nExamples of messages that do NOT reset the active project:\n\n- \"Understood?\"\n- \"Got it?\"\n- \"You understand?\"\n- \"Are you following?\"\n- \"Okay?\"\n- \"Right?\"\n- \"Do you understand?\"\n- \"That's the one.\"\n- \"Yes.\"\n- \"Exactly.\"\n- \"Correct.\"\n- \"That's right.\"\n\nIf the customer has already provided the topic and word count for the active project, do NOT ask for them again simply because the latest message is a short confirmation or follow-up.\n\nExample:\n\nCustomer:\n\"I want another article.\"\n\nAssistant:\n\"Absolutely. What's the topic and word count?\"\n\nCustomer:\n\"It's about becoming a better version of yourself. 2000 words.\"\n\nThe active project is now:\n\nService: Article Writing\nTopic: becoming a better version of yourself\nWord count: 2,000\n\nCustomer:\n\"Understood?\"\n\nThe assistant must retain:\n\nTopic: becoming a better version of yourself\nWord count: 2,000\n\nThe assistant must NOT respond:\n\n\"What's the topic and how many words would you like?\"\n\nInstead, respond naturally to the customer's confirmation while retaining the active project.\n\nFor example:\n\n\"Yes, I understand. It’s a 2,000-word article on becoming a better version of yourself.\"\n\nIf the customer later explicitly says:\n\n\"Actually, make it 1,500 words.\"\n\nThen update the active project:\n\nWord count: 1,500\n\nIf the customer later says:\n\n\"Actually, I want a different topic.\"\n\nThen the previous topic must no longer be treated as the current topic.\n\nIMPORTANT:\n\nDo not repeatedly re-collect information that has already been provided for the CURRENT ACTIVE PROJECT.\n\nOnly ask for information when it is genuinely missing, unclear, or explicitly changed.\n\n==================================================\nCORRECTIONS AND UPDATED INFORMATION\n==================================================\n\nIf the customer corrects something they previously said, ALWAYS use the corrected information.\n\nExamples:\n\nCustomer previously:\n\"I need 1,000 words.\"\n\nLater:\n\"Actually, make it 2,000 words.\"\n\nCurrent word count = 2,000 words.\n\nCustomer previously:\n\"The article is about marriage.\"\n\nLater:\n\"No, it's about becoming a better version of yourself.\"\n\nCurrent topic = becoming a better version of yourself.\n\nCustomer previously:\n\"I want a blog.\"\n\nLater:\n\"Actually, I need an article.\"\n\nCurrent service = Article Writing.\n\nDo not continue using the old value after the customer has clearly corrected it.\n\nThe customer's latest explicit correction overrides older information.\n\n\n==================================================\nNEW PROJECT DETECTION\n==================================================\n\nWhen the customer indicates that they want another or different project:\n\n1. Recognize that the previous project is no longer the active project.\n2. Do not reuse the previous project's topic as the new topic.\n3. Do not reuse the previous project's word count as the new word count unless the customer explicitly says it remains the same.\n4. Do not reuse the previous project's service unless the customer explicitly says it remains the same.\n5. Use any new project details provided by the customer.\n6. If some required information is missing, ask only for the missing information.\n\nFor example:\n\nPrevious:\n\"10 ways to stay married\" — 1,000 words.\n\nCustomer:\n\"I want another article.\"\n\nCorrect response:\n\"Absolutely. What's the topic and word count for the new article?\"\n\nIncorrect response:\n\"Sure. Is this another 1,000-word article on 10 ways to stay married?\"\n\nIf the customer then provides:\n\n\"How to become a better version of yourself, 2,000 words.\"\n\nThe assistant should acknowledge and continue using:\n\nTopic: how to become a better version of yourself\nWord count: 2,000\n\nThe old project must not be brought back into the response.\n\n\n==================================================\nCONTEXT RELEVANCE\n==================================================\n\nDo not treat every previous message as equally relevant.\n\nUse previous conversation history selectively.\n\nPrioritize:\n\n1. The current customer's latest message.\n2. The most recent customer messages directly related to the current subject or project.\n3. Recent confirmed project information.\n4. Older conversation information only when the customer is clearly continuing that same project.\n\nDo not allow an old project to dominate the current conversation simply because it appears frequently in the history.\n\nIf the customer has clearly changed projects, older project-specific information becomes historical context rather than current project information.\n\nIf you are uncertain whether the customer is continuing an old project or starting a new one, follow the customer's explicit wording and ask one short clarification question when necessary.\n\nDo not repeatedly ask for information the customer has already provided for the CURRENT project.\n\n\n==================================================\nEVENT HANDLING\n==================================================\n\nIF event = \"post_comment\":\n\nThis is the prospect's initial engagement with our Instagram content.\n\n- Welcome them naturally.\n- Acknowledge their comment/message when appropriate.\n- If a username is available, you may use it naturally.\n- Ask what brought them to the page or what they are looking for.\n- Keep the response short, friendly, and inviting.\n- Do not immediately overwhelm them with services, pricing, policies, or sales information unless their comment specifically asks for it.\n- Do not immediately push them toward payment.\n- The goal is to start a natural conversation and understand their intent.\n\nExample approach:\n\n\"Thanks for stopping by! What brought you to our page today?\"\n\nHowever, do not copy this example mechanically. Respond naturally based on the customer's actual comment.\n\n\nIF event = \"message\":\n\nThis is an ongoing direct Instagram conversation.\n\n- Respond directly to the customer's latest message.\n- Do NOT treat the customer as a brand-new prospect.\n- Do NOT send an unnecessary welcome message.\n- Continue naturally from the existing conversation.\n- Use previous conversation history to understand what has already been discussed.\n- Do not ask questions that the customer has already answered.\n- If the customer refers to something previously discussed, use the conversation history to answer.\n- If the customer changes the subject, follow the new subject.\n- If the customer starts a new project, follow the new project instead of continuing the previous project.\n\n\n==================================================\nCONVERSATION MEMORY\n==================================================\n\nWhen conversation history exists:\n\n- Read the relevant previous messages before responding.\n- Remember important information already provided by the customer.\n- Do not ask for information that is already available for the CURRENT project.\n- Do not make the customer repeat themselves.\n- Continue from the most recent relevant exchange.\n- If the customer asks \"Do you remember...?\", use the conversation history to answer.\n- If the customer previously provided a topic, word count, service type, deadline, requirements, or other project information, retain that context ONLY when it still applies to the current project.\n- If the customer changes or replaces that information, use the new information.\n- If the customer starts a different project, do not carry the previous project's details into the new project.\n\nExample:\n\nIf the customer previously said:\n\n\"The article is about 10 ways to stay married.\"\n\nAnd later asks:\n\n\"Do you still remember the topic?\"\n\nRespond based on the conversation history instead of asking them to repeat the topic.\n\nHowever, if the customer says:\n\n\"I want a different article.\"\n\nDo NOT assume the old topic still applies.\n\nIf the customer then says:\n\n\"It's about becoming a better version of yourself.\"\n\nThe new topic is \"becoming a better version of yourself.\"\n\n\n==================================================\nBUSINESS KNOWLEDGE\n==================================================\n\nBUSINESS KNOWLEDGE is the authoritative source for business information.\n\nUse it whenever the customer asks about:\n\n- services\n- prices\n- word counts\n- turnaround times\n- revisions\n- payment\n- refunds\n- ordering\n- FAQs\n- policies\n- other business-related information.\n\nDo NOT invent business information.\n\nDo NOT use general assumptions about pricing or business policies when the answer can be obtained from BUSINESS KNOWLEDGE.\n\n\n==================================================\nPRICING\n==================================================\n\nWhen a customer asks for a price:\n\n1. Identify the requested service.\n2. Identify the requested word count if available.\n3. Find the corresponding service price in BUSINESS KNOWLEDGE.\n4. Calculate the total price using the approved per-word rate when appropriate.\n5. State the price clearly in USD.\n6. If the word count is missing, ask for the word count.\n7. If the service type is unclear, ask which writing service they need.\n\nFor example:\n\nIf BUSINESS KNOWLEDGE says:\n\nArticle Writing = $0.10 per word\n\nThen:\n\n500 words = $50 USD\n1,000 words = $100 USD\n1,500 words = $150 USD\n2,000 words = $200 USD\n\nOnly calculate prices using the rates provided in BUSINESS KNOWLEDGE.\n\nDo not invent a different rate.\n\nIf the requested service or pricing information is unavailable, do not guess.\n\n\n==================================================\nTURNAROUND TIME\n==================================================\n\nWhen the customer asks how long an order takes:\n\nUse BUSINESS KNOWLEDGE.\n\nApproved turnaround times currently include:\n\n500 words = 3 days\n1,000 words = 6 days\n2,000 words = 12 days\n3,000 words = 18 days\n4,000 words = 24 days\n5,000 words = 30 days\n\nIMPORTANT TURNAROUND CALCULATION RULE:\n\nIf the customer's requested word count exactly matches a word-count point in BUSINESS KNOWLEDGE, use the corresponding approved turnaround time.\n\nIf the requested word count falls between two approved word-count points, calculate the turnaround proportionally between the two nearest points.\n\nUse linear interpolation between the two nearest approved turnaround points.\n\nFor example:\n\n2,000 words = 12 days\n3,000 words = 18 days\n\nTherefore:\n\n2,500 words = 15 days\n\nAnother example:\n\n1,000 words = 6 days\n2,000 words = 12 days\n\nTherefore:\n\n1,500 words = 9 days\n\nIf the calculated result is not a whole number of days, round UP to the next whole day.\n\nDo not invent a turnaround outside the range covered by the approved BUSINESS KNOWLEDGE.\n\nIf the requested word count is below 500 words or above 5,000 words, explain briefly that the turnaround needs to be confirmed.\n\nAlways use the approved BUSINESS KNOWLEDGE as the basis for the calculation. Do not use general assumptions about delivery speed.\n\n\n==================================================\nORDERS AND BUYING INTENT\n==================================================\n\nWhen the customer wants to place an order:\n\n- Acknowledge their buying intent.\n- Use the conversation history to determine what information they have already provided for the CURRENT project.\n- Do not ask for information they already provided for the CURRENT project.\n- Do not reuse information from an older project unless the customer confirms that it still applies.\n- Determine what information is still needed.\n- Ask only for the next necessary piece of information.\n- Keep the process simple and conversational.\n\nRelevant order information may include:\n\n- writing service\n- word count\n- topic\n- project requirements\n- instructions\n- deadline, when relevant\n\nOnce the required project information is available, use BUSINESS KNOWLEDGE to explain the applicable price, turnaround, revisions, and payment requirement when appropriate.\n\n\n==================================================\nPAYMENT\n==================================================\n\nIf the customer asks about payment:\n\nUse BUSINESS KNOWLEDGE.\n\nThe approved payment method is USDT.\n\nThe approved ordering payment requirement is:\n\n50% upfront payment is required before the order starts.\n\nNever invent or provide a USDT wallet/account address unless that specific information is included in BUSINESS KNOWLEDGE or another approved input.\n\nIf the payment address is not available, do not make one up.\n\n\n==================================================\nREFUNDS\n==================================================\n\nIf the customer asks about refunds:\n\nUse the approved refund policy in BUSINESS KNOWLEDGE.\n\nDo not soften, change, reinterpret, or invent exceptions to the policy.\n\n\n==================================================\nREVISIONS\n==================================================\n\nIf the customer asks about revisions:\n\nUse BUSINESS KNOWLEDGE.\n\nThe approved policy is:\n\nThree revisions are included for all services.\n\nDo not invent additional revision terms.\n\n\n==================================================\nFAQ HANDLING\n==================================================\n\nIf the customer's question matches or is similar to a FAQ in BUSINESS KNOWLEDGE:\n\n- Use the relevant FAQ answer.\n- Answer naturally rather than copying the FAQ mechanically.\n- Keep the response conversational.\n- Do not mention that you found the answer in a database or knowledge source.\n\n\n==================================================\nUNKNOWN INFORMATION / HUMAN HANDOVER\n==================================================\n\nIf the customer asks for information that is not available in BUSINESS KNOWLEDGE or conversation history:\n\n- Do NOT guess.\n- Do NOT invent an answer.\n- Do NOT present assumptions as facts.\n- Do NOT make up a price, policy, delivery time, exception, or business rule.\n- Do NOT pretend to know something that you cannot reliably determine.\n\nIf you cannot confidently understand the customer's request, determine what they are asking for, or provide an accurate answer using the available BUSINESS KNOWLEDGE and conversation history, treat the request as requiring human assistance.\n\nIn these situations, clearly communicate to the customer that the detail needs to be confirmed by the team.\n\nUse natural customer-facing language such as:\n\n\"Let me confirm that for you.\"\n\n\"I'll need to check that with the team.\"\n\n\"Let me check that and get back to you.\"\n\n\"I'd need to confirm that detail before giving you an accurate answer.\"\n\n\"I'll check that with the team and confirm.\"\n\nDo not guess simply to avoid handing the conversation to a human.\n\nIMPORTANT:\n\nIf the request can be answered confidently using BUSINESS KNOWLEDGE, conversation history, or an explicitly defined calculation/rule in these instructions, answer it normally.\n\nDo NOT request human confirmation when the answer can be determined reliably.\n\nExamples:\n\nCustomer:\n\"How long does 2,500 words take?\"\n\nIf the approved turnaround rules allow the calculation:\nAnswer normally using the calculated turnaround.\n\nCustomer:\n\"Can you make it 7,500 words and deliver it tomorrow?\"\n\nIf BUSINESS KNOWLEDGE does not support that delivery commitment:\nDo not promise it.\nSay that the team needs to confirm the request.\n\nCustomer:\n\"Do you offer a service that isn't listed in BUSINESS KNOWLEDGE?\"\n\nDo not invent one.\nTell the customer that you need to confirm it with the team.\n\nCustomer:\n\"I need something completely different from the services you've described and I'm not sure exactly what I need.\"\n\nIf you cannot confidently determine the appropriate service:\nAsk one short clarification question if that can reasonably resolve the request.\n\nIf the request remains unclear or requires a business decision:\nUse customer-facing language indicating that the team needs to assist.\n\nThe goal is:\n\nCONFIDENT AND SUPPORTED → answer normally.\n\nUNCLEAR BUT CLARIFIABLE → ask one short clarification question.\n\nUNKNOWN, UNSUPPORTED, OR REQUIRES A BUSINESS DECISION → indicate that the team needs to confirm it.\n\nNever invent an answer just to keep the conversation automated.\n\n\n==================================================\nPERSONALIZATION\n==================================================\n\nIf \"username\" is available:\n\n- You may use it naturally.\n- Do not use it in every message.\n- Do not force personalization.\n- Never invent a name when username is null.\n\n\n==================================================\nRESPONSE STYLE\n==================================================\n\nSound like a helpful human sales/support representative.\n\nYour tone should be:\n\n- warm\n- confident\n- natural\n- professional\n- conversational\n- helpful\n\nKeep Instagram responses concise.\n\nPrefer:\n\n- 1–3 short sentences\n- one clear question at a time\n- simple language\n- direct answers\n\nAvoid:\n\n- long paragraphs\n- robotic language\n- unnecessary explanations\n- excessive greetings\n- excessive emojis\n- repeated information\n- multiple unrelated questions\n\n\n==================================================\nCONVERSATION BEHAVIOR\n==================================================\n\nAlways:\n\n- Respond to what the customer is saying NOW.\n- Prioritize the latest customer message.\n- Use conversation history when relevant.\n- Use business knowledge when business information is needed.\n- Remember information the customer has already provided for the CURRENT project.\n- Avoid making the customer repeat themselves.\n- Move the conversation toward the most useful next step.\n- Answer a clear question before asking another question.\n- Ask only one important question at a time.\n- Follow the customer's current intent.\n- If the customer changes the subject, follow the new subject.\n- If the customer changes or corrects project information, use the corrected information.\n- If the customer starts a new project, do not carry old project-specific details into it.\n- Never assume that \"another\", \"different\", \"new\", or \"this one\" refers to the previous project's details unless the customer explicitly confirms that.\n\n\n==================================================\nINTERNAL INFORMATION\n==================================================\n\nNever mention or expose:\n\n- AI\n- automation\n- n8n\n- ManyChat\n- webhooks\n- JSON\n- workflows\n- nodes\n- data tables\n- databases\n- system prompts\n- internal instructions\n- business knowledge\n- conversation history as an internal system\n- technical implementation details\n\nThe customer should only see a natural customer-facing response.\n\n\n==================================================\nIMPORTANT OUTPUT RULE\n==================================================\n\nReturn ONLY the final customer-facing Instagram message.\n\nDo not return JSON.\n\nDo not return an array.\n\nDo not include:\n\n\"response:\"\n\n\"answer:\"\n\n\"AI response:\"\n\nor any other label.\n\nDo not include analysis.\n\nDo not explain your reasoning.\n\nDo not include internal notes.\n\nDo not include quotation marks around the response.\n\nThe final output must be ready to send directly to the customer on Instagram."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "a367ede9-010a-4966-950a-e7e891f37e24",
+      "name": "AI response",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        1296,
+        -96
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// DETECT ORDER & HANDOVER INTENT\n// ============================================================\n// PURPOSE:\n//\n// This is the CENTRAL conversation + order + handover processor.\n//\n// EVERYTHING is intentionally kept inside this ONE Code node.\n//\n// It handles:\n//\n// 1. Input data collection\n// 2. Text normalization\n// 3. Helper functions\n// 4. Multiple customer intent detection\n// 5. Service recovery\n// 6. Word-count recovery\n// 7. Payment method detection\n// 8. Explicit topic recovery\n// 9. Flexible project-subject detection\n// 10. Standalone subject detection\n// 11. Business knowledge matching\n// 12. Relevant business knowledge matching\n// 13. Order status detection\n// 14. Customer stage detection\n// 15. Missing order information detection\n// 16. Human handover detection\n// 17. Order details construction\n// 18. Handover object construction\n// 19. Customer Care detection and object construction\n// 20. Deterministic customer-facing response\n// 21. Final structured output\n//\n// IMPORTANT:\n//\n// The CURRENT customer message is the source of truth for\n// handover and Customer Care triggers.\n//\n// Previous customer messages are used for:\n// - context\n// - service recovery\n// - word-count recovery\n// - topic recovery\n// - order reconstruction\n//\n// Historical messages MUST NOT independently trigger a new\n// handover or Customer Care escalation.\n// ============================================================\n\n\n// ============================================================\n// 1. GET INPUT DATA\n// ============================================================\n\nconst context = $('Prepare AI Context').first().json;\n\nconst customer = context.current_customer || {};\nconst history = context.conversation_history || [];\n\nconst aiResponse =\n  $('AI response').first().json.output?.[0]?.content?.[0]?.text || '';\n\nconst businessKnowledge =\n  $('business_knowledge').all().map(item => item.json);\n\n\n// ============================================================\n// 2. NORMALIZE TEXT\n// ============================================================\n\nconst currentMessage = String(customer.message || '').trim();\n\nconst normalize = (text) =>\n  String(text || '')\n    .toLowerCase()\n    .replace(/[-–—]/g, '-')\n    .replace(/\\s+/g, ' ')\n    .trim();\n\nconst message = normalize(currentMessage);\n\nconst historyText = history\n  .map(item => `${item.role || ''}: ${item.message || ''}`)\n  .join('\\n');\n\nconst fullConversation = normalize(\n  `${historyText}\\nuser: ${currentMessage}\\nassistant: ${aiResponse}`\n);\n\n\n// ============================================================\n// 3. HELPER FUNCTIONS\n// ============================================================\n\nfunction addUnique(array, value) {\n  if (value && !array.includes(value)) {\n    array.push(value);\n  }\n}\n\n\n// ------------------------------------------------------------\n// Extract word count\n// ------------------------------------------------------------\n\nfunction extractWordCount(text) {\n\n  const normalized = String(text || '');\n\n  const patterns = [\n\n    /\\b(\\d{1,5}(?:,\\d{3})?)\\s*(?:-|to)?\\s*word(?:s)?\\b/i,\n\n    /\\b(\\d{1,5}(?:,\\d{3})?)\\s*-\\s*word\\b/i\n  ];\n\n  for (const pattern of patterns) {\n\n    const match = normalized.match(pattern);\n\n    if (match) {\n      return Number(\n        match[1].replace(/,/g, '')\n      );\n    }\n  }\n\n  return null;\n}\n\n\n// ------------------------------------------------------------\n// Detect service\n// ------------------------------------------------------------\n\nfunction detectService(text) {\n\n  const normalized = normalize(text);\n\n  const servicePatterns = [\n\n    {\n      name: 'Article Writing',\n      patterns: [\n        /\\barticle writing\\b/,\n        /\\barticles\\b/,\n        /\\barticle\\b/\n      ]\n    },\n\n    {\n      name: 'Blog Writing',\n      patterns: [\n        /\\bblog writing\\b/,\n        /\\bblog post\\b/,\n        /\\bblog posts\\b/,\n        /\\bblogs\\b/,\n        /\\bblog\\b/\n      ]\n    },\n\n    {\n      name: 'Copywriting',\n      patterns: [\n        /\\bcopywriting\\b/,\n        /\\bcopywriter\\b/,\n        /\\bcopy\\b/\n      ]\n    },\n\n    {\n      name: 'Scriptwriting',\n      patterns: [\n        /\\bscriptwriting\\b/,\n        /\\bscript writing\\b/,\n        /\\bscripts\\b/,\n        /\\bscript\\b/\n      ]\n    },\n\n    {\n      name: 'Ghostwriting',\n      patterns: [\n        /\\bghostwriting\\b/,\n        /\\bghost writing\\b/,\n        /\\bghostwriter\\b/,\n        /\\bghostwritten\\b/\n      ]\n    }\n  ];\n\n  for (const service of servicePatterns) {\n\n    for (const pattern of service.patterns) {\n\n      if (pattern.test(normalized)) {\n        return service.name;\n      }\n    }\n  }\n\n  return null;\n}\n\n\n// ============================================================\n// 4. DETECT MULTIPLE INTENTS\n// ============================================================\n\nconst intents = [];\n\n\n// ------------------------------------------------------------\n// PRICING\n// ------------------------------------------------------------\n\nif (\n  /\\bhow much\\b/.test(message) ||\n  /\\bwhat(?:'s| is) the price\\b/.test(message) ||\n  /\\bprice\\b/.test(message) ||\n  /\\bcost\\b/.test(message) ||\n  /\\bcharge\\b/.test(message) ||\n  /\\brate\\b/.test(message) ||\n  /\\bhow much will it cost\\b/.test(message)\n) {\n\n  addUnique(\n    intents,\n    'pricing_question'\n  );\n}\n\n\n// ------------------------------------------------------------\n// DELIVERY / TURNAROUND\n// ------------------------------------------------------------\n\nif (\n  /\\bhow soon\\b/.test(message) ||\n  /\\bhow long\\b/.test(message) ||\n  /\\bdelivery\\b/.test(message) ||\n  /\\bdeliver\\b/.test(message) ||\n  /\\bdelivered\\b/.test(message) ||\n  /\\bturnaround\\b/.test(message) ||\n  /\\bwhen will\\b/.test(message) ||\n  /\\bwhen can\\b/.test(message) ||\n  /\\bhow fast\\b/.test(message)\n) {\n\n  addUnique(\n    intents,\n    'delivery_question'\n  );\n}\n\n\n// ------------------------------------------------------------\n// SERVICE QUESTION\n// ------------------------------------------------------------\n\nif (\n  /\\bwhat services\\b/.test(message) ||\n  /\\bservices do you offer\\b/.test(message) ||\n  /\\bwhat do you offer\\b/.test(message) ||\n  /\\btypes of writing\\b/.test(message)\n) {\n\n  addUnique(\n    intents,\n    'service_question'\n  );\n}\n\n\n// ------------------------------------------------------------\n// PURCHASE INTENT\n// ------------------------------------------------------------\n\nif (\n  /\\bi want to order\\b/.test(message) ||\n  /\\bi would like to order\\b/.test(message) ||\n  /\\bwant to place an order\\b/.test(message) ||\n  /\\bplace an order\\b/.test(message) ||\n  /\\bi want to buy\\b/.test(message) ||\n  /\\bi am ready to order\\b/.test(message) ||\n  /\\bi'm ready to order\\b/.test(message) ||\n  /\\bim ready to order\\b/.test(message) ||\n  /\\blets order\\b/.test(message) ||\n  /\\blet's order\\b/.test(message) ||\n  /\\bgo ahead with the order\\b/.test(message) ||\n  /\\bproceed with the order\\b/.test(message) ||\n  /\\bi want to proceed\\b/.test(message) ||\n  /\\bi'd like to order\\b/.test(message) ||\n  /\\bi would like to proceed\\b/.test(message)\n) {\n\n  addUnique(\n    intents,\n    'purchase_intent'\n  );\n}\n\n\n// ------------------------------------------------------------\n// PAYMENT QUESTION\n// ------------------------------------------------------------\n\nif (\n  /\\bhow do i pay\\b/.test(message) ||\n  /\\bhow can i pay\\b/.test(message) ||\n  /\\bwhere do i pay\\b/.test(message) ||\n  /\\bpayment details\\b/.test(message) ||\n  /\\bpayment method\\b/.test(message) ||\n  /\\bhow to pay\\b/.test(message) ||\n  /\\bhow much upfront\\b/.test(message) ||\n  /\\bwhat payment do you accept\\b/.test(message) ||\n  /\\bwhat payment methods\\b/.test(message)\n) {\n\n  addUnique(\n    intents,\n    'payment_question'\n  );\n}\n\n\n// ------------------------------------------------------------\n// PAYMENT CONFIRMATION\n// ------------------------------------------------------------\n\nif (\n  /\\bi paid\\b/.test(message) ||\n  /\\bi have paid\\b/.test(message) ||\n  /\\bpayment sent\\b/.test(message) ||\n  /\\bpayment made\\b/.test(message) ||\n  /\\bsent the payment\\b/.test(message) ||\n  /\\bpayment completed\\b/.test(message) ||\n  /\\bi've paid\\b/.test(message) ||\n  /\\bpayment has been sent\\b/.test(message)\n) {\n\n  addUnique(\n    intents,\n    'payment_confirmation'\n  );\n}\n\n\n// ------------------------------------------------------------\n// GREETING\n// ------------------------------------------------------------\n\nif (\n  [\n    'hi',\n    'hello',\n    'hey',\n    'good morning',\n    'good afternoon',\n    'good evening'\n  ].includes(message)\n) {\n\n  addUnique(\n    intents,\n    'greeting'\n  );\n}\n\n\n// ------------------------------------------------------------\n// DEFAULT\n// ------------------------------------------------------------\n\nif (intents.length === 0) {\n\n  addUnique(\n    intents,\n    'general_inquiry'\n  );\n}\n\n\n// ============================================================\n// NEW ORDER DETECTION\n// ============================================================\n//\n// A message that explicitly asks for another/new article, blog\n// post, piece, project, or order starts a NEW order.\n//\n// Historical service/topic/word-count values must NOT leak into\n// that new order.\n//\n// Normal follow-ups continue to reuse history.\n// ============================================================\n\nconst isNewOrderRequest =\n  /\\b(?:another|new)\\s+(?:article|blog\\s+post|piece|project|order)\\b/i\n    .test(currentMessage)\n  ||\n  /\\b(?:i\\s+)?(?:want|need|would like)\\s+to\\s+(?:order|place\\s+an?\\s+order\\s+for)\\b/i\n    .test(currentMessage)\n  ||\n  /\\b(?:can|could|would)\\s+you\\s+(?:write|create|produce)\\b[\\s\\S]{0,100}\\b\\d{3,5}\\s*(?:words?|word)\\b/i\n    .test(currentMessage);\n\n// ============================================================\n// 5. RECOVER SERVICE\n// ============================================================\n\nlet service =\n  detectService(\n    currentMessage\n  );\n\n\nif (!service && !isNewOrderRequest) {\n\n  for (\n    let i = history.length - 1;\n    i >= 0;\n    i--\n  ) {\n\n    if (\n      String(history[i].role || '').toLowerCase() !== 'user'\n    ) {\n      continue;\n    }\n\n    service =\n      detectService(\n        history[i].message\n      );\n\n    if (service) {\n      break;\n    }\n  }\n}\n\n\nif (!service && !isNewOrderRequest) {\n\n  service =\n    detectService(\n      fullConversation\n    );\n}\n\n\n// ============================================================\n// 6. RECOVER WORD COUNT\n// ============================================================\n\nlet wordCount =\n  extractWordCount(\n    currentMessage\n  );\n\n\nif (\n  !wordCount &&\n  !isNewOrderRequest\n) {\n\n  for (\n    let i = history.length - 1;\n    i >= 0;\n    i--\n  ) {\n\n    if (\n      String(history[i].role || '').toLowerCase() !== 'user'\n    ) {\n      continue;\n    }\n\n    wordCount =\n      extractWordCount(\n        history[i].message\n      );\n\n    if (wordCount) {\n      break;\n    }\n  }\n}\n\n\n// ============================================================\n// 7. DETECT PAYMENT METHOD\n// ============================================================\n\nlet paymentMethod = null;\n\nif (/\\busdt\\b/.test(currentMessage)) {\n  paymentMethod = 'USDT';\n} else if (!isNewOrderRequest && /\\busdt\\b/.test(fullConversation)) {\n  paymentMethod = 'USDT';\n}\n\n// ============================================================\n// 8. FLEXIBLE TOPIC RECOVERY\n// ============================================================\n\nlet topic = null;\n\n\n// ------------------------------------------------------------\n// 8A. CLEAN TOPIC CANDIDATE\n// ------------------------------------------------------------\n\nfunction cleanTopicCandidate(candidate) {\n\n  if (!candidate) {\n    return null;\n  }\n\n  let value = String(candidate)\n    .trim()\n    .replace(/^[\\s.,;:!?\\-–—_]+/, '')\n    .replace(/^[\"“'`]+/, '')\n    .replace(/[\"”'`]+$/, '')\n    .trim();\n\n\n  value = value\n    .replace(\n      /\\s+(?:and\\s+)?(?:how much|what(?:'s| is) the price|what is the cost|how soon|how long|when can|when will).*$/i,\n      ''\n    )\n    .trim();\n\n\n  value =\n    value.replace(\n      /[.!?]+$/,\n      ''\n    ).trim();\n\n\n  if (!value) {\n    return null;\n  }\n\n\n  const invalidPatterns = [\n\n    /^of the article$/i,\n    /^the article$/i,\n    /^article$/i,\n    /^the topic$/i,\n    /^topic$/i,\n    /^of the topic$/i,\n    /^the subject$/i,\n    /^subject$/i,\n    /^it$/i,\n    /^this$/i,\n    /^that$/i,\n    /^do you remember/i,\n    /^can you remember/i,\n    /^do you still remember/i,\n    /^what is the topic/i,\n    /^what's the topic/i,\n    /^what was the topic/i,\n    /^how much/i,\n    /^how soon/i,\n    /^how long/i,\n    /^when can/i,\n    /^when will/i,\n    /^payment/i,\n    /^delivery/i,\n    /^price/i,\n    /^cost/i\n  ];\n\n\n  if (\n    invalidPatterns.some(\n      pattern => pattern.test(value)\n    )\n  ) {\n\n    return null;\n  }\n\n\n  return value;\n}\n\n\n// ------------------------------------------------------------\n// 8B. EXPLICIT TOPIC PATTERNS\n// ------------------------------------------------------------\n\nconst explicitTopicPatterns = [\n\n  /\\b(?:it|it's|its)\\s+(?:going|gonna)\\s+to\\s+be\\s+on\\s*[:.\\-–—]?\\s*[\"“\\']?(.+?)[\"”\\']?(?:[.!?]|$)/i,\n\n  /\\b(?:it|it's|its)\\s+(?:going|gonna)\\s+to\\s+be\\s+about\\s*[\"“\\']?(.+?)[\"”\\']?(?:[.!?]|$)/i,\n\n  /\\btopic\\s+(?:would be|will be|is|was)\\s+(?:on|about)\\s+[\"“']?(.+?)[\"”']?(?:[.!?]|$)/i,\n\n  /\\btopic\\s*:\\s*[\"“']?(.+?)[\"”']?(?:[.!?]|$)/i,\n\n  /\\bthe\\s+topic\\s+(?:is|was|would be|will be)\\s+(?:on|about)?\\s*[\"“']?(.+?)[\"”']?(?:[.!?]|$)/i,\n\n  /\\barticle(?:'s)?\\s+topic\\s+(?:is|was|would be|will be)\\s+(?:on|about)?\\s*[\"“']?(.+?)[\"”']?(?:[.!?]|$)/i,\n\n  /\\bthe\\s+article\\s+(?:is|was|would be|will be)\\s+about\\s+[\"“']?(.+?)[\"”']?(?:[.!?]|$)/i,\n\n  /\\barticle\\s+(?:is|was|would be|will be)\\s+about\\s+[\"“']?(.+?)[\"”']?(?:[.!?]|$)/i,\n\n  /\\bwriting\\s+(?:is|was|would be|will be)\\s+about\\s+[\"“']?(.+?)[\"”']?(?:[.!?]|$)/i,\n\n  /\\b(?:the\\s+)?subject\\s+(?:is|was|would be|will be)\\s+(?:on|about)?\\s*[\"“']?(.+?)[\"”']?(?:[.!?]|$)/i\n];\n\n\nfor (\n  const pattern of explicitTopicPatterns\n) {\n\n  const match =\n    currentMessage.match(\n      pattern\n    );\n\n  if (\n    match &&\n    match[1]\n  ) {\n\n    const candidate =\n      cleanTopicCandidate(\n        match[1]\n      );\n\n    if (candidate) {\n\n      topic = candidate;\n      break;\n    }\n  }\n}\n\n\nif (\n  !topic &&\n  !isNewOrderRequest\n) {\n\n  for (\n    let i = history.length - 1;\n    i >= 0;\n    i--\n  ) {\n\n    if (\n      String(history[i].role || '').toLowerCase() !== 'user'\n    ) {\n      continue;\n    }\n\n    const text =\n      String(\n        history[i].message || ''\n      );\n\n    for (\n      const pattern of explicitTopicPatterns\n    ) {\n\n      const match =\n        text.match(\n          pattern\n        );\n\n      if (\n        match &&\n        match[1]\n      ) {\n\n        const candidate =\n          cleanTopicCandidate(\n            match[1]\n          );\n\n        if (candidate) {\n\n          topic = candidate;\n          break;\n        }\n      }\n    }\n\n    if (topic) {\n      break;\n    }\n  }\n}\n\n\n// ============================================================\n// 9. FLEXIBLE PROJECT-SUBJECT DETECTION\n// ============================================================\n\nif (!topic) {\n\n  const naturalTopicPatterns = [\n\n    // --------------------------------------------------------\n    // NEW ORDER + CURRENT TOPIC\n    // --------------------------------------------------------\n    // Examples:\n    //\n    // \"I want to order another article on how to become a professor\"\n    // \"I want to order a new article about AI in education\"\n    // \"I would like to order another article on leadership\"\n    // \"I want to place an order for a 3000 words article on 30 ways to stay focused in life\"\n    // --------------------------------------------------------\n\n    /\\b(?:i\\s+)?(?:want|need|would like)\\s+to\\s+(?:order|place\\s+an?\\s+order\\s+for)\\s+(?:an?\\s+)?(?:another|new)?\\s*(?:article|blog post|piece)\\s+(?:on|about|covering|focused on)\\s+(.+?)(?:[.!?]|$)/i,\n\n    // --------------------------------------------------------\n    // NORMAL ARTICLE / BLOG / PIECE REQUEST\n    // --------------------------------------------------------\n\n    /\\b(?:i\\s+)?(?:need|want|would like|am looking for)\\s+(?:an?\\s+)?(?:article|blog post|piece)\\s+(?:on|about|covering|focused on)\\s+(.+?)(?:[.!?]|$)/i,\n\n    /\\b(?:write|create|prepare|produce)\\s+(?:an?\\s+)?(?:article|blog post|piece)\\s+(?:on|about|covering|focused on)\\s+(.+?)(?:[.!?]|$)/i,\n\n    /\\b(?:write|writing)\\s+(?:something\\s+)?(?:about|on)\\s+(.+?)(?:[.!?]|$)/i,\n\n    /\\b(?:an?\\s+)?article\\s+(?:on|about)\\s+(.+?)(?:[.!?]|$)/i,\n\n    /\\b(?:a\\s+)?piece\\s+(?:on|about)\\s+(.+?)(?:[.!?]|$)/i,\n\n    /\\b(?:article|piece|blog(?:\\s+post)?)\\s+(?:should|needs to|has to)\\s+(?:cover|discuss|focus on)\\s+(.+?)(?:[.!?]|$)/i\n  ];\n\n\n  // ==========================================================\n  // 9A. CURRENT MESSAGE ALWAYS WINS\n  // ==========================================================\n\n  for (\n    const pattern of naturalTopicPatterns\n  ) {\n\n    const match =\n      currentMessage.match(\n        pattern\n      );\n\n    if (\n      match &&\n      match[1]\n    ) {\n\n      const candidate =\n        cleanTopicCandidate(\n          match[1]\n        );\n\n      if (candidate) {\n\n        topic = candidate;\n\n        break;\n      }\n    }\n  }\n\n\n  // ==========================================================\n  // 9B. ONLY IF CURRENT MESSAGE HAS NO TOPIC,\n  //     RECOVER FROM HISTORY\n  // ==========================================================\n\n  if (\n    !topic &&\n    !isNewOrderRequest\n  ) {\n\n    for (\n      let i = history.length - 1;\n      i >= 0;\n      i--\n    ) {\n\n      if (\n        String(history[i].role || '').toLowerCase() !== 'user'\n      ) {\n        continue;\n      }\n\n\n      const text =\n        String(\n          history[i].message || ''\n        );\n\n\n      for (\n        const pattern of naturalTopicPatterns\n      ) {\n\n        const match =\n          text.match(\n            pattern\n          );\n\n\n        if (\n          match &&\n          match[1]\n        ) {\n\n          const candidate =\n            cleanTopicCandidate(\n              match[1]\n            );\n\n\n          if (candidate) {\n\n            topic = candidate;\n\n            break;\n          }\n        }\n      }\n\n\n      if (topic) {\n        break;\n      }\n    }\n  }\n}\n\n\n// ============================================================\n// 10. STANDALONE SUBJECT DETECTION\n// ============================================================\n\nif (\n  !topic &&\n  !isNewOrderRequest\n) {\n\n  const customerMessages = history\n    .filter(item =>\n      String(item.role || '').toLowerCase() === 'user'\n    )\n    .map(item =>\n      String(item.message || '').trim()\n    );\n\n  customerMessages.push(\n    currentMessage\n  );\n\n\n  const writingContext =\n    customerMessages.some(text => {\n\n      const normalizedText =\n        normalize(text);\n\n      return (\n        /\\b(?:article|blog|copywriting|script|ghostwriting|writing service|writing services)\\b/i\n          .test(normalizedText)\n      );\n    });\n\n\n  if (writingContext) {\n\n    for (\n      let i = customerMessages.length - 1;\n      i >= 0;\n      i--\n    ) {\n\n      const text =\n        customerMessages[i].trim();\n\n      const normalizedText =\n        normalize(text);\n\n\n      if (\n        /[?]$/.test(text) ||\n        /^(?:do|does|did|is|are|am|can|could|would|will|what|when|where|how|why)\\b/i.test(text)\n      ) {\n        continue;\n      }\n\n\n      if (\n        /^(?:how much|what(?:'s| is) the price|what is the cost|how soon|how long|when can|when will|how do i pay|where do i pay)\\b/i\n          .test(normalizedText)\n      ) {\n        continue;\n      }\n\n\n      let candidate =\n        text\n          .replace(\n            /^(?:the\\s+)?(?:article|blog post|piece|subject|topic)\\s*(?:is|would be|will be|was)?\\s*/i,\n            ''\n          )\n          .trim();\n\n\n      candidate =\n        cleanTopicCandidate(\n          candidate\n        );\n\n\n      if (\n        candidate &&\n        candidate.length <= 160 &&\n        candidate.split(/\\s+/).length <= 25\n      ) {\n\n        const genericOrderPatterns = [\n\n          /^i want to order/i,\n          /^i would like to order/i,\n          /^i want to buy/i,\n          /^place an order/i,\n          /^i am ready to order/i,\n          /^i'm ready to order/i,\n          /^how much/i,\n          /^how soon/i,\n          /^how long/i,\n          /^what services/i\n        ];\n\n\n        if (\n          !genericOrderPatterns.some(\n            pattern =>\n              pattern.test(candidate)\n          )\n        ) {\n\n          topic = candidate;\n          break;\n        }\n      }\n    }\n  }\n}\n\n\n// ============================================================\n// 11. BUSINESS KNOWLEDGE MATCHING\n// ============================================================\n\nlet matchedBusinessKnowledge = [];\n\nlet price = null;\nlet currency = null;\nlet deliveryTime = null;\n\n\n// ------------------------------------------------------------\n// Exact service + word count\n// ------------------------------------------------------------\n\nif (\n  service &&\n  wordCount\n) {\n\n  const exactMatch =\n    businessKnowledge.find(item =>\n      item.active !== false &&\n      item.category === 'faq' &&\n      item.service === service &&\n      Number(item.word_count) === Number(wordCount)\n    );\n\n\n  if (exactMatch) {\n\n    price =\n      exactMatch.price ??\n      null;\n\n    currency =\n      exactMatch.currency ??\n      null;\n\n    deliveryTime =\n      exactMatch.delivery_time ??\n      null;\n\n    matchedBusinessKnowledge.push(\n      exactMatch\n    );\n  }\n}\n\n\n// ------------------------------------------------------------\n// Turnaround\n// ------------------------------------------------------------\n\nif (wordCount) {\n\n  const turnaroundMatch =\n    businessKnowledge.find(item =>\n      item.active !== false &&\n      item.category === 'turnaround' &&\n      Number(item.word_count) === Number(wordCount)\n    );\n\n\n  if (turnaroundMatch) {\n\n    if (!deliveryTime) {\n\n      deliveryTime =\n        turnaroundMatch.delivery_time ??\n        null;\n    }\n\n\n    if (\n      !matchedBusinessKnowledge.includes(\n        turnaroundMatch\n      )\n    ) {\n\n      matchedBusinessKnowledge.push(\n        turnaroundMatch\n      );\n    }\n  }\n}\n\n\n// ------------------------------------------------------------\n// Price calculation fallback\n// ------------------------------------------------------------\n\nif (\n  price === null &&\n  service &&\n  wordCount\n) {\n\n  const serviceRate =\n    businessKnowledge.find(item =>\n      item.active !== false &&\n      item.category === 'service' &&\n      item.service === service\n    );\n\n\n  if (\n    serviceRate &&\n    serviceRate.price != null\n  ) {\n\n    price =\n      Number(serviceRate.price) *\n      Number(wordCount);\n\n    currency =\n      serviceRate.currency ||\n      currency ||\n      'USD';\n\n\n    if (\n      !matchedBusinessKnowledge.includes(\n        serviceRate\n      )\n    ) {\n\n      matchedBusinessKnowledge.push(\n        serviceRate\n      );\n    }\n  }\n}\n\n\n// ============================================================\n// 12. MATCH RELEVANT BUSINESS KNOWLEDGE\n// ============================================================\n\nconst relevantKnowledge =\n  businessKnowledge.filter(item => {\n\n    if (\n      item.active === false\n    ) {\n      return false;\n    }\n\n\n    if (\n      service &&\n      item.service === service\n    ) {\n\n      if (\n        item.word_count != null &&\n        wordCount &&\n        Number(item.word_count) !== Number(wordCount)\n      ) {\n        return false;\n      }\n\n      return true;\n    }\n\n\n    if (\n      wordCount &&\n      item.category === 'turnaround' &&\n      Number(item.word_count) === Number(wordCount)\n    ) {\n\n      return true;\n    }\n\n\n    if (\n      paymentMethod &&\n      item.category === 'policy' &&\n      item.service === 'Payment'\n    ) {\n\n      return true;\n    }\n\n\n    if (\n      intents.includes('pricing_question') &&\n      item.category === 'faq' &&\n      item.question &&\n      /price|cost|pricing/i.test(\n        item.question\n      )\n    ) {\n\n      return true;\n    }\n\n\n    if (\n      intents.includes('delivery_question') &&\n      item.category === 'turnaround' &&\n      wordCount &&\n      Number(item.word_count) === Number(wordCount)\n    ) {\n\n      return true;\n    }\n\n\n    return false;\n  });\n\n\nfor (\n  const item of relevantKnowledge\n) {\n\n  if (\n    !matchedBusinessKnowledge.includes(\n      item\n    )\n  ) {\n\n    matchedBusinessKnowledge.push(\n      item\n    );\n  }\n}\n\n\n// ============================================================\n// 13. DETERMINE ORDER STATUS\n// ============================================================\n\nlet order_status = 'none';\n\n\nif (\n  intents.includes(\n    'payment_confirmation'\n  )\n) {\n\n  order_status =\n    'payment_sent';\n\n}\nelse if (\n  intents.includes(\n    'purchase_intent'\n  )\n) {\n\n  order_status =\n    'interested';\n\n}\nelse if (\n  service &&\n  wordCount &&\n  (\n    intents.includes(\n      'pricing_question'\n    ) ||\n    intents.includes(\n      'delivery_question'\n    )\n  )\n) {\n\n  order_status =\n    'interested';\n\n}\nelse if (\n  service ||\n  wordCount ||\n  topic\n) {\n\n  order_status =\n    'building';\n}\n\n\n// ============================================================\n// 14. DETERMINE CUSTOMER STAGE\n// ============================================================\n\nlet customer_stage =\n  'inquiry';\n\n\nif (\n  intents.includes(\n    'payment_confirmation'\n  )\n) {\n\n  customer_stage =\n    'payment_verification';\n\n}\nelse if (\n  intents.includes(\n    'payment_question'\n  )\n) {\n\n  customer_stage =\n    'payment';\n\n}\nelse if (\n  intents.includes(\n    'purchase_intent'\n  )\n) {\n\n  customer_stage =\n    'ready_to_order';\n\n}\nelse if (\n  intents.includes(\n    'pricing_question'\n  ) ||\n  intents.includes(\n    'delivery_question'\n  )\n) {\n\n  customer_stage =\n    'considering';\n\n}\nelse if (\n  intents.includes(\n    'service_question'\n  )\n) {\n\n  customer_stage =\n    'inquiry';\n\n}\nelse if (\n  intents.includes(\n    'greeting'\n  )\n) {\n\n  customer_stage =\n    'conversation';\n}\n\n\n// ============================================================\n// 15. DETERMINE MISSING INFORMATION\n// ============================================================\n\nconst missingInformation = [];\n\n\nif (!service) {\n\n  missingInformation.push(\n    'service'\n  );\n}\n\n\nif (!wordCount) {\n\n  missingInformation.push(\n    'word_count'\n  );\n}\n\n\nif (\n  intents.includes(\n    'purchase_intent'\n  ) &&\n  !topic\n) {\n\n  missingInformation.push(\n    'topic'\n  );\n}\n\n\n// ============================================================\n// 16. DETECT HANDOVER\n// ============================================================\n\nlet handoverRequired = false;\nlet handoverReason = null;\n\n\n// IMPORTANT:\n// Human handover and Customer Care triggers inspect ONLY\n// the current customer message.\n//\n// Conversation history is still available elsewhere in the\n// Code node for context, recovery, order reconstruction, etc.\n//\n// DO NOT use historical customer messages for these triggers.\n\nconst currentHandoverMessage = message;\n\n\n// ------------------------------------------------------------\n// LAST ASSISTANT MESSAGE FOR CONTEXTUAL PAYMENT CONFIRMATION\n// ------------------------------------------------------------\n\nlet lastAssistantMessage = '';\n\nfor (\n  let i = history.length - 1;\n  i >= 0;\n  i--\n) {\n\n  if (\n    String(history[i].role || '').toLowerCase() === 'assistant'\n  ) {\n\n    lastAssistantMessage =\n      String(history[i].message || '');\n\n    break;\n  }\n}\n\n\nconst normalizedLastAssistantMessage =\n  normalize(\n    lastAssistantMessage\n  );\n\n\nconst customerConfirmedPaymentDetails =\n  (\n    /\\b(?:yes|yeah|yep|sure|okay|ok|alright|please)\\b/i.test(message) ||\n\n    /\\b(?:yes|yeah|yep|sure|okay|ok|alright)\\b.*\\b(?:send|give|provide|share|do it|go ahead|let's do it)\\b/i.test(message) ||\n\n    /\\b(?:send|give|provide|share)\\s+(?:it|them|the details|the payment details)\\b/i.test(message) ||\n\n    /\\bgo\\s+ahead\\b/i.test(message)\n  ) &&\n  (\n    /\\b(?:payment|usdt)\\b.*\\b(?:details|address|account|wallet|information)\\b/i.test(normalizedLastAssistantMessage) ||\n\n    /\\b(?:details|address|account|wallet|information)\\b.*\\b(?:payment|usdt)\\b/i.test(normalizedLastAssistantMessage) ||\n\n    /\\b(?:send|give|provide|share)\\b.*\\b(?:payment|usdt)\\b.*\\b(?:details|address|account|wallet|information)\\b/i.test(normalizedLastAssistantMessage) ||\n\n    /\\b(?:payment|usdt)\\s+(?:details|address|account|wallet)\\b/i.test(normalizedLastAssistantMessage)\n  );\n\n\n// ------------------------------------------------------------\n// 16A. EXPLICIT HUMAN REQUEST\n// ------------------------------------------------------------\n\nif (\n  /\\b(?:speak|talk|chat)\\s+(?:to|with)\\s+(?:a|an)?\\s*(?:human|person|agent|representative|staff|manager)\\b/i\n    .test(currentHandoverMessage) ||\n\n  /\\b(?:connect|transfer|put me through)\\s+(?:to|with)\\s+(?:a|an)?\\s*(?:human|person|agent|representative|staff|manager)\\b/i\n    .test(currentHandoverMessage)\n) {\n\n  handoverRequired = true;\n\n  handoverReason =\n    'customer_requested_human';\n}\n\n\n// ------------------------------------------------------------\n// 16B. ESCALATION\n// ------------------------------------------------------------\n\nif (\n  !handoverRequired &&\n  (\n    /\\b(?:escalate|escalation)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:speak|talk)\\s+to\\s+(?:someone\\s+in\\s+charge|management)\\b/i\n      .test(currentHandoverMessage)\n  )\n) {\n\n  handoverRequired = true;\n\n  handoverReason =\n    'customer_requested_escalation';\n}\n\n\n// ============================================================\n// 16C. PAYMENT ACTION / PAYMENT DESTINATION REQUEST\n// ============================================================\n//\n// These mean the customer is moving from asking about payment\n// to actually making payment.\n//\n// Examples:\n//\n// - I'm ready to pay\n// - I want to make payment\n// - I need to pay\n// - I'm going to pay now\n// - Where do I pay?\n// - Where can I pay?\n// - How do I pay?\n// - How can I pay?\n// - Send me the payment details\n// - Send me the USDT payment details\n// - Give me the USDT payment details\n// - Send me the USDT address\n// - What's the USDT account?\n// - Give me the payment wallet\n// - What account should I pay to?\n//\n// IMPORTANT:\n//\n// Simple information questions such as:\n//\n// - Do you accept USDT?\n// - How much upfront?\n// - What payment methods do you accept?\n//\n// remain automated.\n//\n// Requesting the actual payment destination/details\n// triggers human handover.\n// ============================================================\n\nif (\n  !handoverRequired &&\n  (\n\n    // --------------------------------------------------------\n    // READY / INTENTION TO PAY\n    // --------------------------------------------------------\n\n    /\\b(?:i\\s*(?:am|'m)|we\\s*(?:are|'re))\\s+(?:ready|prepared)\\s+to\\s+(?:make\\s+)?(?:the\\s+)?payment\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:i\\s*(?:am|'m)|we\\s*(?:are|'re))\\s+(?:ready|prepared)\\s+to\\s+pay\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:i\\s+want\\s+to|i\\s+would\\s+like\\s+to|i\\s+need\\s+to)\\s+(?:make\\s+)?(?:the\\s+)?payment\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:i\\s+want\\s+to|i\\s+would\\s+like\\s+to|i\\s+need\\s+to)\\s+pay\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:let'?s|let\\s+us)\\s+(?:make\\s+)?(?:the\\s+)?payment\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:going|about)\\s+to\\s+(?:make\\s+)?(?:the\\s+)?payment\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:going|about)\\s+to\\s+pay\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:pay|make\\s+the\\s+payment|make\\s+payment)\\s+now\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:proceed|go\\s+ahead)\\s+with\\s+(?:the\\s+)?payment\\b/i\n      .test(currentHandoverMessage) ||\n\n\n    // --------------------------------------------------------\n    // CONTEXTUAL CONFIRMATION\n    // --------------------------------------------------------\n    //\n    // Example:\n    //\n    // Assistant:\n    // \"Would you like me to send the USDT payment details?\"\n    //\n    // Customer:\n    // \"Yes, send it.\"\n    //\n    // The previous assistant message is used ONLY as context.\n    // --------------------------------------------------------\n\n    customerConfirmedPaymentDetails ||\n\n\n    // --------------------------------------------------------\n    // DIRECT PAYMENT DETAILS REQUEST\n    // --------------------------------------------------------\n\n    /\\b(?:send|give|provide|share)\\s+(?:me\\s+)?(?:the\\s+)?(?:usdt\\s+)?(?:payment\\s+)?(?:details|information)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:send|give|provide|share)\\s+(?:me\\s+)?(?:the\\s+)?usdt\\s+payment\\s+details\\b/i\n      .test(currentHandoverMessage) ||\n\n\n    // --------------------------------------------------------\n    // PAYMENT ADDRESS / ACCOUNT / WALLET\n    // --------------------------------------------------------\n\n    /\\b(?:send|give|provide|share)\\s+(?:me\\s+)?(?:the\\s+)?(?:usdt\\s+)?(?:payment\\s+)?(?:address|account|account\\s+number|wallet)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:what|which|where)\\s+(?:is|are)\\s+(?:the\\s+)?(?:usdt\\s+)?(?:payment\\s+)?(?:address|account|account\\s+number|wallet)\\b/i\n      .test(currentHandoverMessage) ||\n\n\n    // --------------------------------------------------------\n    // WHAT ACCOUNT / ADDRESS SHOULD I USE?\n    // --------------------------------------------------------\n\n    /\\b(?:what|which)\\s+(?:account|wallet|address)\\s+(?:should|do)\\s+i\\s+(?:pay|send|transfer)\\s+(?:to)?\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:what|which)\\s+(?:account|wallet|address)\\s+should\\s+i\\s+use\\s+to\\s+pay\\b/i\n      .test(currentHandoverMessage) ||\n\n\n    // --------------------------------------------------------\n    // WHERE DO I PAY?\n    // --------------------------------------------------------\n\n    /\\bwhere\\s+(?:do|can|should)\\s+i\\s+pay\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\bwhere\\s+(?:do|can|should)\\s+i\\s+make\\s+(?:the\\s+)?payment\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\bwhere\\s+(?:do|can|should)\\s+i\\s+send\\s+(?:the\\s+)?(?:payment|usdt)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\bwhere\\s+(?:do|can|should)\\s+i\\s+transfer\\s+(?:the\\s+)?(?:payment|usdt)\\b/i\n      .test(currentHandoverMessage) ||\n\n\n    // --------------------------------------------------------\n    // HOW DO I PAY?\n    // --------------------------------------------------------\n\n    /\\bhow\\s+(?:do|can)\\s+i\\s+pay\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\bhow\\s+(?:do|can)\\s+i\\s+(?:make|send|transfer)\\s+(?:the\\s+)?(?:payment|usdt)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\bhow\\s+do\\s+i\\s+make\\s+(?:the\\s+)?payment\\b/i\n      .test(currentHandoverMessage) ||\n\n\n    // --------------------------------------------------------\n    // EXPLICIT 50% PAYMENT ACTION\n    // --------------------------------------------------------\n\n    /\\b(?:pay|send|transfer)\\s+(?:the\\s+)?(?:50|fifty)\\s*%\\s*(?:upfront)?\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:where|how)\\s+(?:do|can)\\s+i\\s+(?:pay|send|transfer)\\s+(?:the\\s+)?(?:50|fifty)\\s*%\\b/i\n      .test(currentHandoverMessage)\n\n  )\n) {\n\n  handoverRequired = true;\n\n  handoverReason =\n    'customer_ready_to_make_payment';\n}\n\n\n// ------------------------------------------------------------\n// 16D. PAYMENT CONFIRMATION\n// ------------------------------------------------------------\n\nif (\n  !handoverRequired &&\n  intents.includes('payment_confirmation')\n) {\n\n  handoverRequired = true;\n\n  handoverReason =\n    'payment_requires_verification';\n}\n\n\n// ------------------------------------------------------------\n// 16E. PAYMENT PROBLEM / FAILURE\n// ------------------------------------------------------------\n\nif (\n  !handoverRequired &&\n  (\n    /\\bpayment\\s+(?:failed|failure|didn't\\s+go\\s+through|did\\s+not\\s+go\\s+through|was\\s+declined|declined)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:payment|usdt)\\s+(?:problem|issue|error)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:can't|cannot|couldn't|could\\s+not)\\s+(?:make|send)\\s+(?:the\\s+)?payment\\b/i\n      .test(currentHandoverMessage)\n  )\n) {\n\n  handoverRequired = true;\n\n  handoverReason =\n    'payment_problem';\n}\n\n\n// ------------------------------------------------------------\n// 16F. COMPLAINT / DISPUTE\n// ------------------------------------------------------------\n\nif (\n  !handoverRequired &&\n  (\n    /\\b(?:complaint|complain)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:dispute|disputing)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:fraud|scam|scammed)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:charged\\s+twice|wrongly\\s+charged)\\b/i\n      .test(currentHandoverMessage)\n  )\n) {\n\n  handoverRequired = true;\n\n  handoverReason =\n    'customer_complaint_or_dispute';\n}\n\n\n// ------------------------------------------------------------\n// 16G. REFUND\n// ------------------------------------------------------------\n\nif (\n  !handoverRequired &&\n  /\\b(?:refund|refunded|money\\s+back)\\b/i\n    .test(currentHandoverMessage)\n) {\n\n  handoverRequired = true;\n\n  handoverReason =\n    'refund_request';\n}\n\n\n// ------------------------------------------------------------\n// 16H. EXISTING ORDER / PROJECT PROBLEM\n// ------------------------------------------------------------\n\nif (\n  !handoverRequired &&\n  (\n    /\\b(?:my|our)\\s+(?:order|project|article|writing)\\s+(?:has|have|is|was)\\s+(?:a\\s+)?(?:problem|issue|error)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:problem|issue|error)\\s+with\\s+(?:my|our)\\s+(?:order|project|article|writing)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\bmy\\s+order\\s+(?:is\\s+wrong|isn't\\s+right|is\\s+not\\s+right)\\b/i\n      .test(currentHandoverMessage)\n  )\n) {\n\n  handoverRequired = true;\n\n  handoverReason =\n    'existing_order_or_project_problem';\n}\n\n\n// ------------------------------------------------------------\n// 16I. CANCELLATION / MAJOR ORDER CHANGE\n// ------------------------------------------------------------\n\nif (\n  !handoverRequired &&\n  (\n    /\\b(?:cancel|cancellation)\\s+(?:my\\s+)?(?:order|project)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:change|modify)\\s+(?:my\\s+)?(?:order|project)\\s+(?:after|once|now)\\b/i\n      .test(currentHandoverMessage)\n  )\n) {\n\n  handoverRequired = true;\n\n  handoverReason =\n    'order_cancellation_or_major_change';\n}\n\n\n// ------------------------------------------------------------\n// 16J. QUALITY / DELIVERY PROBLEM\n// ------------------------------------------------------------\n\nif (\n  !handoverRequired &&\n  (\n    /\\b(?:late|delayed|overdue)\\s+(?:order|delivery|article|project)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:order|delivery|article|project)\\s+(?:is|was)\\s+(?:late|delayed|overdue)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:not\\s+happy|unhappy|dissatisfied)\\s+with\\s+(?:the\\s+)?(?:work|article|writing|order)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:quality|work|article|writing)\\s+(?:is|was)\\s+(?:poor|bad|incorrect|wrong)\\b/i\n      .test(currentHandoverMessage)\n  )\n) {\n\n  handoverRequired = true;\n\n  handoverReason =\n    'quality_or_delivery_problem';\n}\n\n\n// ============================================================\n// 16K. CUSTOMER CARE / COMPLAINT DETECTION\n// ============================================================\n\nlet customerCareRequired = false;\nlet customerCareReason = null;\n\n\n// ------------------------------------------------------------\n// 16K-1. GENERAL COMPLAINT / DISSATISFACTION\n// ------------------------------------------------------------\n\nif (\n  (\n    /\\b(?:complaint|complain)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:i'm|i am|im|we're|we are)\\s+(?:not\\s+happy|unhappy|dissatisfied|disappointed)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:not\\s+happy|unhappy|dissatisfied|disappointed)\\s+with\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:this\\s+is|that's|that\\s+is)\\s+(?:not\\s+acceptable|unacceptable)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:terrible|awful|poor)\\s+(?:service|work|quality)\\b/i\n      .test(currentHandoverMessage)\n  )\n) {\n\n  customerCareRequired = true;\n\n  customerCareReason =\n    'customer_complaint';\n}\n\n\n// ------------------------------------------------------------\n// 16K-2. ORDER / PROJECT ISSUE\n// ------------------------------------------------------------\n\nif (\n  !customerCareRequired &&\n  (\n    /\\b(?:problem|issue|error)\\s+with\\s+(?:my|our)\\s+(?:order|project|article|writing|work)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:my|our)\\s+(?:order|project|article|writing|work)\\s+(?:has|have|is|was)\\s+(?:a\\s+)?(?:problem|issue|error)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:something|anything)\\s+(?:is|was)\\s+wrong\\s+with\\s+(?:my|our)\\s+(?:order|project|article|writing|work)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\bmy\\s+(?:order|project|article|writing|work)\\s+(?:is|was)\\s+(?:wrong|incorrect)\\b/i\n      .test(currentHandoverMessage)\n  )\n) {\n\n  customerCareRequired = true;\n\n  customerCareReason =\n    'order_or_project_issue';\n}\n\n\n// ------------------------------------------------------------\n// 16K-3. QUALITY COMPLAINT\n// ------------------------------------------------------------\n\nif (\n  !customerCareRequired &&\n  (\n    /\\b(?:quality|work|article|writing)\\s+(?:is|was)\\s+(?:poor|bad|incorrect|wrong|unacceptable)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:poor|bad|incorrect|wrong|unacceptable)\\s+(?:quality|work|article|writing)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:not\\s+what|isn't\\s+what|is\\s+not\\s+what)\\s+i\\s+(?:asked|ordered|requested)\\s+for\\b/i\n      .test(currentHandoverMessage)\n  )\n) {\n\n  customerCareRequired = true;\n\n  customerCareReason =\n    'quality_complaint';\n}\n\n\n// ------------------------------------------------------------\n// 16K-4. DELIVERY COMPLAINT\n// ------------------------------------------------------------\n\nif (\n  !customerCareRequired &&\n  (\n    /\\b(?:my|our)\\s+(?:order|delivery|article|project)\\s+(?:is|was)\\s+(?:late|delayed|overdue)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:order|delivery|article|project)\\s+(?:is|was)\\s+(?:late|delayed|overdue)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\blate\\s+delivery\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\bdelayed\\s+delivery\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\boverdue\\s+delivery\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:still|yet)\\s+(?:haven't|have not|hasn't|has not)\\s+(?:received|gotten|got)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\bwhere\\s+is\\s+my\\s+(?:order|article|project|work|delivery)\\b/i\n      .test(currentHandoverMessage)\n  )\n) {\n\n  customerCareRequired = true;\n\n  customerCareReason =\n    'delivery_complaint';\n}\n\n\n// ------------------------------------------------------------\n// 16K-5. REFUND / MONEY-BACK REQUEST\n// ------------------------------------------------------------\n\nif (\n  !customerCareRequired &&\n  (\n    /\\b(?:i\\s+want|i'd\\s+like|i\\s+would\\s+like|can\\s+i\\s+get|i\\s+need)\\s+(?:a\\s+)?refund\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:give|get|send)\\s+(?:me\\s+)?(?:a\\s+)?refund\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:i\\s+want|i'd\\s+like|i\\s+would\\s+like)\\s+(?:my\\s+)?money\\s+back\\b/i\n      .test(currentHandoverMessage)\n  )\n) {\n\n  customerCareRequired = true;\n\n  customerCareReason =\n    'refund_request';\n}\n\n\n// ------------------------------------------------------------\n// 16K-6. PAYMENT DISPUTE / DUPLICATE CHARGE\n// ------------------------------------------------------------\n\nif (\n  !customerCareRequired &&\n  (\n    /\\b(?:charged\\s+twice|charged\\s+two\\s+times|double\\s+charged)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:wrongly|incorrectly)\\s+charged\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:fraud|scam|scammed)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:dispute|disputing)\\s+(?:the\\s+)?(?:payment|charge|transaction)\\b/i\n      .test(currentHandoverMessage)\n  )\n) {\n\n  customerCareRequired = true;\n\n  customerCareReason =\n    'payment_dispute';\n}\n\n\n// ------------------------------------------------------------\n// 16K-7. EXPLICIT CUSTOMER CARE REQUEST\n// ------------------------------------------------------------\n\nif (\n  !customerCareRequired &&\n  (\n    /\\b(?:speak|talk|chat)\\s+(?:to|with)\\s+(?:customer\\s+care|customer\\s+support|support\\s+team)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:contact|connect|transfer)\\s+(?:me\\s+)?(?:to|with)\\s+(?:customer\\s+care|customer\\s+support|support\\s+team)\\b/i\n      .test(currentHandoverMessage) ||\n\n    /\\b(?:i\\s+need|i\\s+want)\\s+(?:customer\\s+care|customer\\s+support|support)\\b/i\n      .test(currentHandoverMessage)\n  )\n) {\n\n  customerCareRequired = true;\n\n  customerCareReason =\n    'customer_requested_support';\n}\n\n// ------------------------------------------------------------\n// 16K-8. AI CANNOT RELIABLY HANDLE THE REQUEST\n// ------------------------------------------------------------\n// IMPORTANT:\n// final_ai_response is created later in Section 20.\n// At this point, use aiResponse, which already contains the\n// actual AI response from the AI response node.\n// ------------------------------------------------------------\n\nif (\n  !customerCareRequired &&\n  (\n    /\\b(?:i\\s+)?(?:can't|cannot)\\s+(?:confirm|answer|help|assist)\\b/i.test(aiResponse) ||\n    /\\b(?:i'm|i am)\\s+not\\s+sure\\b/i.test(aiResponse) ||\n    /\\bneeds?\\s+(?:to\\s+be\\s+)?confirmed\\b/i.test(aiResponse) ||\n    /\\blet\\s+me\\s+(?:check|confirm)\\s+(?:with\\s+the\\s+team|that\\s+with\\s+the\\s+team)\\b/i.test(aiResponse) ||\n    /\\b(?:team|staff)\\s+(?:approval|confirmation)\\b/i.test(aiResponse) ||\n    /\\b(?:i'll|i\\s+will)\\s+(?:check|confirm)\\s+(?:with\\s+the\\s+team|availability)\\b/i.test(aiResponse)\n  )\n) {\n  customerCareRequired = true;\n  customerCareReason = 'ai_unable_to_reliably_answer';\n}\n\n// ============================================================\n// 17. BUILD ORDER ID + ORDER DETAILS\n// ============================================================\n\n// ------------------------------------------------------------\n// EXISTING ORDER ID\n// ------------------------------------------------------------\n// If the customer already has an active/current order,\n// reuse that same order ID.\n//\n// EXCEPTION:\n// If the CURRENT message explicitly starts ANOTHER/NEW order,\n// create the next order ID instead.\n// ------------------------------------------------------------\n\nconst existingOrderId =\n  $('Check Client Handover Status').first().json.current_order_id || null;\n\n\n// ------------------------------------------------------------\n// CURRENT CUSTOMER\n// ------------------------------------------------------------\n\nconst currentUserId =\n  String(\n    $('Prepare data').first().json.user_id || ''\n  );\n\n\n// ------------------------------------------------------------\n// SHORT CUSTOMER ID\n// ------------------------------------------------------------\n\nconst shortUserId =\n  currentUserId.slice(-6);\n\n\n// ------------------------------------------------------------\n// CREATE A NEW ORDER NUMBER\n// ------------------------------------------------------------\n//\n// For a NEW customer/order:\n//\n// ORD-041624-001\n//\n// For an existing customer starting another order:\n//\n// ORD-041624-002\n//\n// The next number is calculated from the current order ID.\n// ------------------------------------------------------------\n\nconst newOrderId =\n  `ORD-${shortUserId}-001`;\n\n\n// ------------------------------------------------------------\n// FINAL ORDER ID\n// ------------------------------------------------------------\n//\n// Existing order + normal follow-up:\n//     reuse existing order ID\n//\n// Existing order + \"another/new\":\n//     increment order number\n//\n// No existing order:\n//     create 001\n// ------------------------------------------------------------\n\nlet order_id;\n\nif (\n  existingOrderId &&\n  isNewOrderRequest\n) {\n\n  const existingId =\n    String(existingOrderId);\n\n  const match =\n    existingId.match(\n      /^(.*-)(\\d+)$/\n    );\n\n  if (match) {\n\n    const prefix =\n      match[1];\n\n    const currentNumber =\n      Number(match[2]);\n\n    const nextNumber =\n      currentNumber + 1;\n\n    order_id =\n      `${prefix}${String(nextNumber).padStart(match[2].length, '0')}`;\n\n  }\n  else {\n\n    order_id =\n      newOrderId;\n  }\n\n}\nelse {\n\n  order_id =\n    existingOrderId ||\n    newOrderId;\n}\n\n\n// ============================================================\n// ORDER DETAILS\n// ============================================================\n\nconst order_details = {\n\n  service: service,\n\n  word_count: wordCount,\n\n  topic: topic,\n\n  price: price,\n\n  currency: currency,\n\n  delivery_time: deliveryTime,\n\n  payment_method: paymentMethod\n};\n\n\n// ============================================================\n// 18. BUILD HANDOVER\n// ============================================================\n\nconst handover = {\n\n  required:\n    handoverRequired,\n\n  reason:\n    handoverReason\n};\n\n\n// ============================================================\n// 19. BUILD CUSTOMER CARE\n// ============================================================\n\nconst customer_care = {\n\n  required:\n    customerCareRequired,\n\n  reason:\n    customerCareReason\n};\n\n\n// ============================================================\n// 20. BUILD CUSTOMER-FACING INSTAGRAM RESPONSE\n// ============================================================\n\nlet final_ai_response = aiResponse;\n\nif (\n  intents.includes('purchase_intent') &&\n  service &&\n  wordCount &&\n  topic &&\n  price !== null\n) {\n\n  const deliveryDisplay = deliveryTime\n    ? String(deliveryTime).replace(/\\s+days?\\s*$/i, ' days')\n    : 'To be confirmed';\n\n  const upfrontAmount = Number(price) * 0.5;\n\n  final_ai_response =\n    `Perfect — I’ve got your order.\\n\\n` +\n    `📝 Topic\\n` +\n    `“${String(topic).trim()}”\\n\\n` +\n    `📋 Order Details\\n` +\n    `• Service: ${service}\\n` +\n    `• Word count: ${Number(wordCount).toLocaleString()}\\n` +\n    `• Total: $${Number(price).toLocaleString()} ${currency || 'USD'}\\n` +\n    `• Upfront: $${upfrontAmount.toLocaleString()} USDT\\n` +\n    `• Delivery: ${deliveryDisplay}\\n` +\n    `• Revisions: 3\\n\\n` +\n    `Would you like me to send the USDT payment details here so we can begin?`;\n}\n\n\n// ============================================================\n// 20A. DETERMINISTIC PAYMENT HANDOVER RESPONSE\n// ============================================================\n\nif (\n  handoverRequired &&\n  handoverReason === 'customer_ready_to_make_payment'\n) {\n\n  final_ai_response =\n    `Perfect — I’ll have our team take over and send you the USDT payment details here.`;\n}\n\n\n// ------------------------------------------------------------\n// Payment already sent / payment requires verification\n// ------------------------------------------------------------\n\nif (\n  handoverRequired &&\n  handoverReason === 'payment_requires_verification'\n) {\n\n  final_ai_response =\n    `Thanks — I’ll have our team verify the payment and get back to you shortly.`;\n}\n\n\n// ============================================================\n// 21. RETURN FINAL STATE\n// ============================================================\n\nreturn {\n  json: {\n\n    current_customer:\n      customer,\n\n    conversation_history:\n      history,\n\n    business_knowledge:\n      businessKnowledge,\n\n    ai_response:\n      aiResponse,\n\n    final_ai_response:\n      final_ai_response,\n\n    intents:\n      intents,\n\n    customer_stage:\n      customer_stage,\n\n    order_status:\n      order_status,\n\n    order_details:\n      order_details,\n\n    order_id:\n      order_id,\n\n    missing_information:\n      missingInformation,\n\n    handover:\n      handover,\n\n    customer_care:\n      customer_care,\n\n    matched_business_knowledge:\n      matchedBusinessKnowledge\n\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1648,
+        -96
+      ],
+      "id": "6dbe9b2a-ec3c-4a1b-85e6-6eb21bc91641",
+      "name": "Detect Order & Handover Intent"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0a16be1e-cd7a-4e8d-b55e-59edeb59b5f5",
+              "leftValue": "={{ $('Detect Order & Handover Intent').first().json.handover.required }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2768,
+        0
+      ],
+      "id": "8560b56a-db05-47c9-a24a-ec131264bd95",
+      "name": "Payment Handover?"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0C05PB7MRN",
+          "mode": "list",
+          "cachedResultName": "new_sales"
+        },
+        "text": "=🚨 *CUSTOMER HANDOVER REQUIRED*\n\n👤 *CUSTOMER*\nInstagram: @{{ $('Detect Order & Handover Intent').first().json.current_customer.username }}\n\n📌 *REASON*\n{{ $('Detect Order & Handover Intent').first().json.handover.reason }}\n\n💬 *CUSTOMER MESSAGE*\n> {{ $('Detect Order & Handover Intent').first().json.current_customer.message }}\n\n📋 *ORDER DETAILS*\n• Service: {{ $('Detect Order & Handover Intent').first().json.order_details.service }}\n• Word count: {{ $('Detect Order & Handover Intent').first().json.order_details.word_count }}\n• Topic: {{ $('Detect Order & Handover Intent').first().json.order_details.topic }}\n• Delivery: {{ $('Detect Order & Handover Intent').first().json.order_details.delivery_time }}\n\n💰 *PAYMENT*\n• Order value: ${{ $('Detect Order & Handover Intent').first().json.order_details.price }} {{ $('Detect Order & Handover Intent').first().json.order_details.currency }}\n• Upfront: ${{ $('Detect Order & Handover Intent').first().json.order_details.price * 0.5 }} {{ $('Detect Order & Handover Intent').first().json.order_details.currency }}\n• Method: {{ $('Detect Order & Handover Intent').first().json.order_details.payment_method }}\n\n👉 *ACTION*\nPlease take over the conversation.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        3216,
+        -96
+      ],
+      "id": "f8a3da2e-bcf1-45b5-8059-c64fddcec31d",
+      "name": "#Sales Channel",
+      "webhookId": "1913c6f8-bb72-4e8c-9d83-48c715b6d80e",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "nb6yGR0Du60X7OuM",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0BUV1PPSN8",
+          "mode": "list",
+          "cachedResultName": "customer-care"
+        },
+        "text": "=🚨 *CUSTOMER CARE REQUIRED*\n\n👤 *CUSTOMER*\nInstagram: @{{ $('Detect Order & Handover Intent').first().json.current_customer.username }}\n\n📌 *REASON*\n{{ $('Detect Order & Handover Intent').first().json.customer_care.reason }}\n\n💬 *CUSTOMER MESSAGE*\n> {{ $('Detect Order & Handover Intent').first().json.current_customer.message }}\n\n📋 *ORDER DETAILS*\n• Service: {{ $('Detect Order & Handover Intent').first().json.order_details.service }}\n• Word count: {{ $('Detect Order & Handover Intent').first().json.order_details.word_count }}\n• Topic: {{ $('Detect Order & Handover Intent').first().json.order_details.topic }}\n• Delivery: {{ $('Detect Order & Handover Intent').first().json.order_details.delivery_time }}\n\n💰 *ORDER VALUE*\n• ${{ $('Detect Order & Handover Intent').first().json.order_details.price }} {{ $('Detect Order & Handover Intent').first().json.order_details.currency }}\n\n👉 *ACTION*\nPlease take over and assist the customer.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        2768,
+        -192
+      ],
+      "id": "e92180e9-21cf-45f3-b83b-67fb7b9270a4",
+      "name": "#Customer Channel",
+      "webhookId": "1913c6f8-bb72-4e8c-9d83-48c715b6d80e",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "nb6yGR0Du60X7OuM",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0a16be1e-cd7a-4e8d-b55e-59edeb59b5f5",
+              "leftValue": "={{ $('Detect Order & Handover Intent').first().json.customer_care.required }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2544,
+        -96
+      ],
+      "id": "23baa99b-e44b-4e8a-a51d-e63eabd386af",
+      "name": "Customer Care?"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1NbDg02E2yittS8BTgsWNNuYyZs5XBa0gaeyweVwxZiw",
+          "mode": "list",
+          "cachedResultName": "clients_database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NbDg02E2yittS8BTgsWNNuYyZs5XBa0gaeyweVwxZiw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2027679653,
+          "mode": "list"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "instagram_user_id",
+              "lookupValue": "={{ $('Prepare AI Context').first().json.current_customer.user_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        848,
+        -96
+      ],
+      "id": "7d21921b-f199-4238-8263-cb0abecd0390",
+      "name": "Check Client Handover Status",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7QDJ5YHEZUaiprZF",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1NbDg02E2yittS8BTgsWNNuYyZs5XBa0gaeyweVwxZiw",
+          "mode": "list",
+          "cachedResultName": "clients_database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NbDg02E2yittS8BTgsWNNuYyZs5XBa0gaeyweVwxZiw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2027679653,
+          "mode": "list",
+          "cachedResultName": "clients_database(1)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NbDg02E2yittS8BTgsWNNuYyZs5XBa0gaeyweVwxZiw/edit#gid=2027679653"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "instagram_user_id": "={{ $('Detect Order & Handover Intent').first().json.current_customer.user_id }}",
+            "service": "={{ $('Detect Order & Handover Intent').first().json.order_details.service || $('Check Client Handover Status').first().json.service || '' }}",
+            "word_count": "={{ $('Detect Order & Handover Intent').first().json.order_details.word_count || $('Check Client Handover Status').first().json.word_count || '' }}",
+            "client_id": "={{ $('Check Client Handover Status').first().json.client_id || $('Detect Order & Handover Intent').first().json.current_customer.user_id }}",
+            "username": "={{ $('Detect Order & Handover Intent').first().json.current_customer.username || $('Check Client Handover Status').first().json.username || '' }}",
+            "topic": "={{ $('Detect Order & Handover Intent').first().json.order_details.topic || $('Check Client Handover Status').first().json.topic || '' }}",
+            "order_value": "={{ $('Detect Order & Handover Intent').first().json.order_details.price || $('Check Client Handover Status').first().json.order_value || '' }}",
+            "upfront_amount": "={{ $('Detect Order & Handover Intent').first().json.order_details.price * 0.5 }}",
+            "turnaround_days": "={{ parseInt($('Detect Order & Handover Intent').first().json.order_details.delivery_time) }}",
+            "order_status": "={{ $('Check Client Handover Status').first().json.order_status || 'Pending' }}",
+            "payment_status": "={{ $('Check Client Handover Status').first().json.payment_status || 'Pending' }}",
+            "handover_status": "={{ $('Detect Order & Handover Intent').first().json.handover.required ? 'HUMAN' : ($('Check Client Handover Status').first().json.handover_status || 'AI') }}",
+            "delivery_date": "={{ $('Check Client Handover Status').first().json.delivery_date || '' }}",
+            "current_order_id": "={{ $('Detect Order & Handover Intent').first().json.order_id }}"
+          },
+          "matchingColumns": [
+            "instagram_user_id"
+          ],
+          "schema": [
+            {
+              "id": "client_id",
+              "displayName": "client_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "instagram_user_id",
+              "displayName": "instagram_user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "current_order_id",
+              "displayName": "current_order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "service",
+              "displayName": "service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "word_count",
+              "displayName": "word_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "topic",
+              "displayName": "topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "order_value",
+              "displayName": "order_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "upfront_amount",
+              "displayName": "upfront_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "payment_status",
+              "displayName": "payment_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "payment_verified_at",
+              "displayName": "payment_verified_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "turnaround_days",
+              "displayName": "turnaround_days",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "delivery_date",
+              "displayName": "delivery_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "order_status",
+              "displayName": "order_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "handover_status",
+              "displayName": "handover_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2992,
+        -96
+      ],
+      "id": "ad109114-913a-4a68-8229-bb62550f96ab",
+      "name": "Client_Database",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7QDJ5YHEZUaiprZF",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "919c1470-7844-4d50-bda8-199cc27b4a87",
+              "leftValue": "={{ $json.handover_status }}",
+              "rightValue": "HUMAN",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1072,
+        -96
+      ],
+      "id": "ea6db2f9-7f30-4e94-b6b0-8774d97c3f03",
+      "name": "Check_handover_status"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1OAQuaGXJE5eGdb5HdpWfRLDdo6X8Dwo_4_Ii0L8Hd1E",
+          "mode": "list",
+          "cachedResultName": "orders_database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1OAQuaGXJE5eGdb5HdpWfRLDdo6X8Dwo_4_Ii0L8Hd1E/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 463558307,
+          "mode": "list",
+          "cachedResultName": "orders_database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1OAQuaGXJE5eGdb5HdpWfRLDdo6X8Dwo_4_Ii0L8Hd1E/edit#gid=463558307"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "order_id": "={{ $('Detect Order & Handover Intent').first().json.order_id }}",
+            "instagram_user_id": "={{ $('Detect Order & Handover Intent').first().json.current_customer.user_id }}",
+            "client_id": "={{ $('Check Client Handover Status').first().json.client_id || 'CL-' + $('Detect Order & Handover Intent').first().json.current_customer.user_id }}",
+            "service": "={{ $('Detect Order & Handover Intent').first().json.order_details.service }}",
+            "word_count": "={{ $('Detect Order & Handover Intent').first().json.order_details.word_count }}",
+            "topic": "={{ $('Detect Order & Handover Intent').first().json.order_details.topic }}",
+            "order_value": "={{ $('Detect Order & Handover Intent').first().json.order_details.price }}",
+            "upfront_amount": "={{ $('Detect Order & Handover Intent').first().json.order_details.price * 0.5 }}",
+            "payment_method": "={{ $('Detect Order & Handover Intent').first().json.order_details.payment_method }}",
+            "turnaround_days": "={{ parseInt($('Detect Order & Handover Intent').first().json.order_details.delivery_time) }}",
+            "created_at": "={{ $('Detect Order & Handover Intent').first().json.current_customer.timestamp }}",
+            "updated_at": "={{ $('Detect Order & Handover Intent').first().json.current_customer.timestamp }}",
+            "username": "={{ $('Detect Order & Handover Intent').first().json.current_customer.username || $('Check Client Handover Status').first().json.username || '' }}",
+            "payment_status": "={{ $('Check Client Handover Status').first().json.payment_status || 'Pending' }}",
+            "payment_verified_at": "={{ $('Check Client Handover Status').first().json.payment_verified_at || '' }}",
+            "delivery_date": "={{ $('Check Client Handover Status').first().json.delivery_date || '' }}",
+            "order_status": "={{ $('Check Client Handover Status').first().json.order_status || 'Pending' }}"
+          },
+          "matchingColumns": [
+            "order_id"
+          ],
+          "schema": [
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "client_id",
+              "displayName": "client_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "instagram_user_id",
+              "displayName": "instagram_user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "service",
+              "displayName": "service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "word_count",
+              "displayName": "word_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "topic",
+              "displayName": "topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "order_value",
+              "displayName": "order_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "upfront_amount",
+              "displayName": "upfront_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "payment_method",
+              "displayName": "payment_method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "payment_status",
+              "displayName": "payment_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "payment_verified_at",
+              "displayName": "payment_verified_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "turnaround_days",
+              "displayName": "turnaround_days",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "delivery_date",
+              "displayName": "delivery_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "order_status",
+              "displayName": "order_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1872,
+        -96
+      ],
+      "id": "d667f9b7-fc4e-47d4-95c9-0516ad16b8c9",
+      "name": "Order_Database",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7QDJ5YHEZUaiprZF",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare data": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "instagram_conversations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean the field": {
+      "main": [
+        [
+          {
+            "node": "Send Message to Manychats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "instagram_conversations": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "business_knowledge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save user message": {
+      "main": [
+        [
+          {
+            "node": "Save AI message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save AI message": {
+      "main": [
+        [
+          {
+            "node": "Customer Care?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "business_knowledge": {
+      "main": [
+        [
+          {
+            "node": "Prepare AI Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare AI Context": {
+      "main": [
+        [
+          {
+            "node": "Check Client Handover Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI response": {
+      "main": [
+        [
+          {
+            "node": "Detect Order & Handover Intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detect Order & Handover Intent": {
+      "main": [
+        [
+          {
+            "node": "Order_Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Payment Handover?": {
+      "main": [
+        [
+          {
+            "node": "Client_Database",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Clean the field",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Customer Care?": {
+      "main": [
+        [
+          {
+            "node": "#Customer Channel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Payment Handover?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Client Handover Status": {
+      "main": [
+        [
+          {
+            "node": "Check_handover_status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Client_Database": {
+      "main": [
+        [
+          {
+            "node": "#Sales Channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check_handover_status": {
+      "main": [
+        [],
+        [
+          {
+            "node": "AI response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Order_Database": {
+      "main": [
+        [
+          {
+            "node": "Save user message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4e3b0668-57a4-4f98-b0cb-e98a2728c161",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7447cb7d6641746e7301185f6a478aa1d67ce67fae836ff082c961e077230e49"
+  },
+  "nodeGroups": [],
+  "id": "MpvfrZ4vUuj5XkMf",
+  "tags": []
+}
